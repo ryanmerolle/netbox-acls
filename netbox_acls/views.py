@@ -32,6 +32,11 @@ __all__ = (
     "ACLExtendedRuleEditView",
     "ACLExtendedRuleDeleteView",
     "ACLExtendedRuleBulkDeleteView",
+    "ACLGroupView",
+    "ACLGroupListView",
+    "ACLGroupEditView",
+    "ACLGroupDeleteView",
+    "ACLGroupBulkDeleteView",
 )
 
 
@@ -469,3 +474,53 @@ class ACLExtendedRuleBulkDeleteView(generic.BulkDeleteView):
     )
     filterset = filtersets.ACLExtendedRuleFilterSet
     table = tables.ACLExtendedRuleTable
+
+
+#
+# ACLGroup views
+#
+
+
+@register_model_view(models.ACLGroup)
+class ACLGroupView(generic.ObjectView):
+    """
+    Defines the view for the ACLGroup django model.
+    """
+
+    queryset = models.ACLGroup.objects.prefetch_related("tags")
+
+
+class ACLGroupListView(generic.ObjectListView):
+    """
+    Defines the list view for the ACLGroup django model.
+    """
+
+    queryset = models.ACLGroup.objects.prefetch_related("tags")
+    table = tables.ACLGroupTable
+    filterset = filtersets.ACLGroupFilterSet
+    filterset_form = forms.ACLGroupFilterForm
+
+
+@register_model_view(models.ACLGroup, "edit")
+class ACLGroupEditView(generic.ObjectEditView):
+    """
+    Defines the edit view for the ACLGroup django model.
+    """
+
+    queryset = models.ACLGroup.objects.prefetch_related("tags")
+    form = forms.ACLGroupForm
+
+
+@register_model_view(models.ACLGroup, "delete")
+class ACLGroupDeleteView(generic.ObjectDeleteView):
+    """
+    Defines delete view for the ACLGroup django model.
+    """
+
+    queryset = models.ACLGroup.objects.prefetch_related("tags")
+
+
+class ACLGroupBulkDeleteView(generic.BulkDeleteView):
+    queryset = models.ACLGroup.objects.prefetch_related("tags")
+    filterset = filtersets.ACLGroupFilterSet
+    table = tables.ACLGroupTable

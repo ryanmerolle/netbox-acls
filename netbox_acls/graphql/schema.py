@@ -18,3 +18,5 @@ class NetBoxACLSQuery:
     acl_standard_rule: ACLStandardRuleType = strawberry_django.field()
     acl_standard_rule_list: List[ACLStandardRuleType] = strawberry_django.field()
 
+    acl_group: ACLGroupType = strawberry_django.field()
+    acl_group_list: List[ACLGroupType] = strawberry_django.field()

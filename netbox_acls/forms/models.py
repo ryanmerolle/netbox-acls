@@ -24,6 +24,7 @@ from ..models import (
     ACLExtendedRule,
     ACLInterfaceAssignment,
     ACLStandardRule,
+    ACLGroup,
 )
 
 __all__ = (
@@ -31,6 +32,7 @@ __all__ = (
     "ACLInterfaceAssignmentForm",
     "ACLStandardRuleForm",
     "ACLExtendedRuleForm",
+    "ACLGroupForm",
 )
 
 # Sets a standard mark_safe help_text value to be used by the various classes
@@ -118,9 +120,15 @@ class AccessListForm(NetBoxModelForm):
         },
     )
 
+    acl_group = DynamicModelChoiceField(
+        queryset=ACLGroup.objects.all(),
+        required=False,
+        label="ACL Group",
+    )
+
     comments = CommentField()
     fieldsets = (
-        FieldSet('region', 'site_group', 'site', 'virtual_machine', 'virtual_chassis', 'device', name=_('Assignment')),
+        FieldSet('region', 'site_group', 'site', 'virtual_machine', 'virtual_chassis', 'device', 'acl_group', name=_('Assignment')),
         FieldSet('name', 'type', 'default_action', name=_('Access List')),
         FieldSet('comments', 'tags', name=_('')),
     )
@@ -134,6 +142,7 @@ class AccessListForm(NetBoxModelForm):
             "device",
             "virtual_machine",
             "virtual_chassis",
+            "acl_group",
             "name",
             "type",
             "default_action",
@@ -196,6 +205,7 @@ class AccessListForm(NetBoxModelForm):
         device = self.cleaned_data.get("device")
         virtual_chassis = self.cleaned_data.get("virtual_chassis")
         virtual_machine = self.cleaned_data.get("virtual_machine")
+        acl_group = self.cleaned_data.get("acl_group")
 
         # Check if more than one host type selected.
         if (device and virtual_chassis) or (device and virtual_machine) or (virtual_chassis and virtual_machine):
@@ -204,8 +214,8 @@ class AccessListForm(NetBoxModelForm):
             )
 
         # Check if no hosts selected.
-        if not device and not virtual_chassis and not virtual_machine:
-            raise ValidationError({"__all__": "Access Lists must be assigned to a device, virtual chassis or virtual machine."})
+        if not device and not virtual_chassis and not virtual_machine and not acl_group:
+            raise ValidationError({"__all__": "Access Lists must be assigned to a device, virtual chassis, virtual machine, or ACL group."})
 
         existing_acls = None
         if device:
@@ -217,6 +227,9 @@ class AccessListForm(NetBoxModelForm):
         elif virtual_chassis:
             host_type = "virtual_chassis"
             existing_acls = AccessList.objects.filter(name=name, virtual_chassis=virtual_chassis).exists()
+        elif acl_group:
+            host_type = "acl_group"
+            existing_acls = AccessList.objects.filter(name=name, acl_group=acl_group).exists()
 
         # Check if duplicate entry.
         if ("name" in self.changed_data or host_type in self.changed_data) and existing_acls:
@@ -233,7 +246,7 @@ class AccessListForm(NetBoxModelForm):
     def save(self, *args, **kwargs):
         # Set assigned object
         self.instance.assigned_object = (
-            self.cleaned_data.get("device") or self.cleaned_data.get("virtual_chassis") or self.cleaned_data.get("virtual_machine")
+            self.cleaned_data.get("device") or self.cleaned_data.get("virtual_chassis") or self.cleaned_data.get("virtual_machine") or self.cleaned_data.get("acl_group")
         )
 
         return super().save(*args, **kwargs)
@@ -611,3 +624,23 @@ class ACLExtendedRuleForm(NetBoxModelForm):
 
         if error_message:
             raise ValidationError(error_message)
+
+
+class ACLGroupForm(NetBoxModelForm):
+    """
+    GUI form to add or edit an ACLGroup.
+    Requires a name.
+    """
+
+    class Meta:
+        model = ACLGroup
+        fields = (
+            "name",
+            "devices",
+            "virtual_chassis",
+            "virtual_machines",
+        )
+
+        help_texts = {
+            "name": "The name of the ACL group.",
+        }

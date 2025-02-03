@@ -27,7 +27,7 @@ class AccessListType(OrganizationalObjectType):
         Annotated["DeviceType", strawberry.lazy('dcim.graphql.types')],
         Annotated["VirtualMachineType", strawberry.lazy('virtualization.graphql.types')],
     ], strawberry.union("ACLAssignmentType")]
-
+    acl_group: Annotated["ACLGroupType", strawberry.lazy("netbox_acls.graphql.types")]
 
     class Meta:
         """
@@ -53,9 +53,6 @@ class ACLInterfaceAssignmentType(OrganizationalObjectType):
         Annotated["InterfaceType", strawberry.lazy('dcim.graphql.types')],
         Annotated["VMInterfaceType", strawberry.lazy('virtualization.graphql.types')],
     ], strawberry.union("ACLInterfaceAssignmentType")]
-
-    
-
 
     class Meta:
         """
@@ -111,3 +108,23 @@ class ACLStandardRuleType(OrganizationalObjectType):
         def aclstandardrules(self) -> List[Annotated["ACLStandardRule", strawberry.lazy('aclstandardrule.graphql.types')]]:
             return self.aclstandardrules.all()
 
+@strawberry_django.type(
+    models.ACLGroup,
+    fields='__all__',
+    filters=ACLGroupFilter
+)
+class ACLGroupType(OrganizationalObjectType):
+    """
+    Defines the object type for the django model ACLGroup.
+    """
+    devices: List[Annotated["DeviceType", strawberry.lazy('dcim.graphql.types')]]
+    virtual_chassis: List[Annotated["VirtualChassisType", strawberry.lazy('dcim.graphql.types')]]
+    virtual_machines: List[Annotated["VirtualMachineType", strawberry.lazy('virtualization.graphql.types')]]
+
+    class Meta:
+        """
+        Associates the filterset, fields, and model for the django model ACLGroup.
+        """
+        @strawberry_django.field
+        def aclgroups(self) -> List[Annotated["ACLGroup", strawberry.lazy('aclgroup.graphql.types')]]:
+            return self.aclgroups.all()

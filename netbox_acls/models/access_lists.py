@@ -17,6 +17,7 @@ from ..constants import ACL_HOST_ASSIGNMENT_MODELS, ACL_INTERFACE_ASSIGNMENT_MOD
 __all__ = (
     "AccessList",
     "ACLInterfaceAssignment",
+    "ACLGroup",
 )
 
 
@@ -24,6 +25,45 @@ alphanumeric_plus = RegexValidator(
     r"^[a-zA-Z0-9-_]+$",
     "Only alphanumeric, hyphens, and underscores characters are allowed.",
 )
+
+
+class ACLGroup(NetBoxModel):
+    """
+    Model definition for ACL Groups.
+    """
+
+    name = models.CharField(
+        max_length=500,
+        validators=[alphanumeric_plus],
+    )
+    devices = models.ManyToManyField(
+        to=Device,
+        related_name="acl_groups",
+    )
+    virtual_chassis = models.ManyToManyField(
+        to=VirtualChassis,
+        related_name="acl_groups",
+    )
+    virtual_machines = models.ManyToManyField(
+        to=VirtualMachine,
+        related_name="acl_groups",
+    )
+
+    class Meta:
+        unique_together = ["name"]
+        ordering = ["name"]
+        verbose_name = "ACL Group"
+        verbose_name_plural = "ACL Groups"
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        """
+        The method is a Django convention; although not strictly required,
+        it conveniently returns the absolute URL for any particular object.
+        """
+        return reverse("plugins:netbox_acls:aclgroup", args=[self.pk])
 
 
 class AccessList(NetBoxModel):
@@ -44,6 +84,13 @@ class AccessList(NetBoxModel):
     assigned_object = GenericForeignKey(
         ct_field="assigned_object_type",
         fk_field="assigned_object_id",
+    )
+    acl_group = models.ForeignKey(
+        to=ACLGroup,
+        on_delete=models.CASCADE,
+        related_name="access_lists",
+        null=True,
+        blank=True,
     )
     type = models.CharField(
         max_length=30,

@@ -5,13 +5,14 @@ Define the object lists / table view for each of the plugin models.
 import django_tables2 as tables
 from netbox.tables import ChoiceFieldColumn, NetBoxTable, columns
 
-from .models import AccessList, ACLExtendedRule, ACLInterfaceAssignment, ACLStandardRule
+from .models import AccessList, ACLExtendedRule, ACLInterfaceAssignment, ACLStandardRule, ACLGroup
 
 __all__ = (
     "AccessListTable",
     "ACLInterfaceAssignmentTable",
     "ACLStandardRuleTable",
     "ACLExtendedRuleTable",
+    "ACLGroupTable",
 )
 
 
@@ -49,6 +50,10 @@ class AccessListTable(NetBoxTable):
     rule_count = tables.Column(
         verbose_name="Rule Count",
     )
+    acl_group = tables.Column(
+        linkify=True,
+        verbose_name="ACL Group",
+    )
     tags = columns.TagColumn(
         url_name="plugins:netbox_acls:accesslist_list",
     )
@@ -66,6 +71,7 @@ class AccessListTable(NetBoxTable):
             "comments",
             "action",
             "tags",
+            "acl_group",
         )
         default_columns = (
             "name",
@@ -74,6 +80,7 @@ class AccessListTable(NetBoxTable):
             "rule_count",
             "default_action",
             "tags",
+            "acl_group",
         )
 
 
@@ -207,4 +214,52 @@ class ACLExtendedRuleTable(NetBoxTable):
             "destination_prefix",
             "destination_ports",
             "protocol",
+        )
+
+
+class ACLGroupTable(NetBoxTable):
+    """
+    Defines the table view for the ACLGroup model.
+    """
+
+    pk = columns.ToggleColumn()
+    id = tables.Column(
+        linkify=True,
+    )
+    name = tables.Column(
+        linkify=True,
+    )
+    devices = tables.ManyToManyColumn(
+        linkify_item=True,
+        verbose_name="Devices",
+    )
+    virtual_chassis = tables.ManyToManyColumn(
+        linkify_item=True,
+        verbose_name="Virtual Chassis",
+    )
+    virtual_machines = tables.ManyToManyColumn(
+        linkify_item=True,
+        verbose_name="Virtual Machines",
+    )
+    tags = columns.TagColumn(
+        url_name="plugins:netbox_acls:aclgroup_list",
+    )
+
+    class Meta(NetBoxTable.Meta):
+        model = ACLGroup
+        fields = (
+            "pk",
+            "id",
+            "name",
+            "devices",
+            "virtual_chassis",
+            "virtual_machines",
+            "tags",
+        )
+        default_columns = (
+            "name",
+            "devices",
+            "virtual_chassis",
+            "virtual_machines",
+            "tags",
         )

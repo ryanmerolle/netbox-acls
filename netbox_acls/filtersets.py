@@ -8,13 +8,14 @@ from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 from virtualization.models import VirtualMachine, VMInterface
 
-from .models import AccessList, ACLExtendedRule, ACLInterfaceAssignment, ACLStandardRule
+from .models import AccessList, ACLExtendedRule, ACLInterfaceAssignment, ACLStandardRule, ACLGroup
 
 __all__ = (
     "AccessListFilterSet",
     "ACLStandardRuleFilterSet",
     "ACLInterfaceAssignmentFilterSet",
     "ACLExtendedRuleFilterSet",
+    "ACLGroupFilterSet",
 )
 
 
@@ -73,6 +74,17 @@ class AccessListFilterSet(NetBoxModelFilterSet):
         queryset=VirtualMachine.objects.all(),
         label="Virtual machine (ID)",
     )
+    acl_group = django_filters.ModelMultipleChoiceFilter(
+        field_name="acl_group__name",
+        queryset=ACLGroup.objects.all(),
+        to_field_name="name",
+        label="ACL Group (name)",
+    )
+    acl_group_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="acl_group",
+        queryset=ACLGroup.objects.all(),
+        label="ACL Group (ID)",
+    )
 
     class Meta:
         """
@@ -89,6 +101,8 @@ class AccessListFilterSet(NetBoxModelFilterSet):
             "virtual_chassis_id",
             "virtual_machine",
             "virtual_machine_id",
+            "acl_group",
+            "acl_group_id",
             "type",
             "default_action",
             "comments",
@@ -106,6 +120,7 @@ class AccessListFilterSet(NetBoxModelFilterSet):
                 | Q(device__name__icontains=value)
                 | Q(virtual_chassis__name__icontains=value)
                 | Q(virtual_machine__name__icontains=value)
+                | Q(acl_group__name__icontains=value)
                 | Q(type__icontains=value)
                 | Q(default_action__icontains=value)
                 | Q(comments__icontains=value)
@@ -217,5 +232,31 @@ class ACLExtendedRuleFilterSet(NetBoxModelFilterSet):
                 | Q(index__icontains=value)
                 | Q(action__icontains=value)
                 | Q(protocol__icontains=value)
+        )
+        return queryset.filter(query)
+
+
+class ACLGroupFilterSet(NetBoxModelFilterSet):
+    """
+    Define the filter set for the django model ACLGroup.
+    """
+
+    class Meta:
+        """
+        Associates the django model ACLGroup & fields to the filter set.
+        """
+
+        model = ACLGroup
+        fields = ("id", "name", "devices", "virtual_chassis", "virtual_machines")
+
+    def search(self, queryset, name, value):
+        """
+        Override the default search behavior for the django model.
+        """
+        query = (
+            Q(name__icontains=value)
+            | Q(devices__name__icontains=value)
+            | Q(virtual_chassis__name__icontains=value)
+            | Q(virtual_machines__name__icontains=value)
         )
         return queryset.filter(query)

@@ -7,6 +7,7 @@ __all__ = (
     'ACLInterfaceAssignmentFilter',
     'ACLExtendedRuleFilter',
     'ACLStandardRuleFilter',
+    'ACLGroupFilter',
 )
 
 @strawberry_django.filter(models.AccessList, lookups=True)
@@ -27,4 +28,9 @@ class ACLExtendedRuleFilter(BaseFilterMixin):
 @strawberry_django.filter(models.ACLInterfaceAssignment, lookups=True)
 @autotype_decorator(filtersets.ACLInterfaceAssignmentFilterSet)
 class ACLInterfaceAssignmentFilter(BaseFilterMixin):
+    pass
+
+@strawberry_django.filter(models.ACLGroup, lookups=True)
+@autotype_decorator(filtersets.ACLGroupFilterSet)
+class ACLGroupFilter(BaseFilterMixin):
     pass
