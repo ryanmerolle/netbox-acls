@@ -8,13 +8,15 @@ from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 from virtualization.models import VirtualMachine, VMInterface
 
-from .models import AccessList, ACLExtendedRule, ACLInterfaceAssignment, ACLStandardRule
+from .models import AccessList, ACLExtendedRule, ACLInterfaceAssignment, ACLStandardRule, ACLGroup, ACLGroupInterfaceAssignment
 
 __all__ = (
     "AccessListFilterSet",
     "ACLStandardRuleFilterSet",
     "ACLInterfaceAssignmentFilterSet",
     "ACLExtendedRuleFilterSet",
+    "ACLGroupFilterSet",
+    "ACLGroupInterfaceAssignmentFilterSet",
 )
 
 
@@ -73,6 +75,12 @@ class AccessListFilterSet(NetBoxModelFilterSet):
         queryset=VirtualMachine.objects.all(),
         label="Virtual machine (ID)",
     )
+    group = django_filters.ModelMultipleChoiceFilter(
+        field_name="group",
+        queryset=ACLGroup.objects.all(),
+        to_field_name="id",
+        label="ACL Group",
+    )
 
     class Meta:
         """
@@ -95,6 +103,7 @@ class AccessListFilterSet(NetBoxModelFilterSet):
             "site",
             "site_group",
             "region",
+            "group",
         )
 
     def search(self, queryset, name, value):
@@ -217,5 +226,84 @@ class ACLExtendedRuleFilterSet(NetBoxModelFilterSet):
                 | Q(index__icontains=value)
                 | Q(action__icontains=value)
                 | Q(protocol__icontains=value)
+        )
+        return queryset.filter(query)
+
+
+class ACLGroupFilterSet(NetBoxModelFilterSet):
+    """
+    Define the filter set for the django model ACLGroup.
+    """
+
+    class Meta:
+        """
+        Associates the django model ACLGroup & fields to the filter set.
+        """
+
+        model = ACLGroup
+        fields = ("id", "name", "description")
+
+    def search(self, queryset, name, value):
+        """
+        Override the default search behavior for the django model.
+        """
+        query = (
+            Q(name__icontains=value)
+            | Q(description__icontains=value)
+        )
+        return queryset.filter(query)
+
+
+class ACLGroupInterfaceAssignmentFilterSet(NetBoxModelFilterSet):
+    """
+    Define the filter set for the django model ACLGroupInterfaceAssignment.
+    """
+
+    interface = django_filters.ModelMultipleChoiceFilter(
+        field_name="interface__name",
+        queryset=Interface.objects.all(),
+        to_field_name="name",
+        label="Interface (name)",
+    )
+    interface_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="interface",
+        queryset=Interface.objects.all(),
+        label="Interface (ID)",
+    )
+    acl_group = django_filters.ModelMultipleChoiceFilter(
+        field_name="acl_group__name",
+        queryset=ACLGroup.objects.all(),
+        to_field_name="name",
+        label="ACL Group (name)",
+    )
+    acl_group_id = django_filters.ModelMultipleChoiceFilter(
+        field_name="acl_group",
+        queryset=ACLGroup.objects.all(),
+        label="ACL Group (ID)",
+    )
+
+    class Meta:
+        """
+        Associates the django model ACLGroupInterfaceAssignment & fields to the filter set.
+        """
+
+        model = ACLGroupInterfaceAssignment
+        fields = (
+            "id",
+            "acl_group",
+            "interface",
+            "direction",
+            "comments",
+        )
+
+    def search(self, queryset, name, value):
+        """
+        Override the default search behavior for the django model.
+        """
+        query = (
+            Q(acl_group__name__icontains=value)
+            | Q(interface__name__icontains=value)
+            | Q(direction__icontains=value)
+            | Q(comments__icontains=value)
         )
         return queryset.filter(query)

@@ -11,6 +11,8 @@ from ..models import (
     ACLExtendedRule,
     ACLInterfaceAssignment,
     ACLStandardRule,
+    ACLGroup,
+    ACLGroupInterfaceAssignment,
 )
 
 __all__ = [
@@ -18,6 +20,8 @@ __all__ = [
     "NestedACLInterfaceAssignmentSerializer",
     "NestedACLStandardRuleSerializer",
     "NestedACLExtendedRuleSerializer",
+    "NestedACLGroupSerializer",
+    "NestedACLGroupInterfaceAssignmentSerializer",
 ]
 
 
@@ -91,3 +95,39 @@ class NestedACLExtendedRuleSerializer(WritableNestedSerializer):
 
         model = ACLExtendedRule
         fields = ("id", "url", "display", "index")
+
+
+class NestedACLGroupSerializer(WritableNestedSerializer):
+    """
+    Defines the nested serializer for the django ACLGroup model & associates it to a view.
+    """
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:netbox_acls-api:aclgroup-detail",
+    )
+
+    class Meta:
+        """
+        Associates the django model ACLGroup & fields to the nested serializer.
+        """
+
+        model = ACLGroup
+        fields = ("id", "url", "display", "name")
+
+
+class NestedACLGroupInterfaceAssignmentSerializer(WritableNestedSerializer):
+    """
+    Defines the nested serializer for the django ACLGroupInterfaceAssignment model & associates it to a view.
+    """
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:netbox_acls-api:aclgroupinterfaceassignment-detail",
+    )
+
+    class Meta:
+        """
+        Associates the django model ACLGroupInterfaceAssignment & fields to the nested serializer.
+        """
+
+        model = ACLGroupInterfaceAssignment
+        fields = ("id", "url", "display", "acl_group", "interface")

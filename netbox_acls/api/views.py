@@ -13,6 +13,8 @@ from .serializers import (
     ACLExtendedRuleSerializer,
     ACLInterfaceAssignmentSerializer,
     ACLStandardRuleSerializer,
+    ACLGroupSerializer,
+    ACLGroupInterfaceAssignmentSerializer,
 )
 
 __all__ = [
@@ -20,6 +22,8 @@ __all__ = [
     "ACLStandardRuleViewSet",
     "ACLInterfaceAssignmentViewSet",
     "ACLExtendedRuleViewSet",
+    "ACLGroupViewSet",
+    "ACLGroupInterfaceAssignmentViewSet",
 ]
 
 
@@ -79,3 +83,27 @@ class ACLExtendedRuleViewSet(NetBoxModelViewSet):
     )
     serializer_class = ACLExtendedRuleSerializer
     filterset_class = filtersets.ACLExtendedRuleFilterSet
+
+
+class ACLGroupViewSet(NetBoxModelViewSet):
+    """
+    Defines the view set for the django ACLGroup model & associates it to a view.
+    """
+
+    queryset = models.ACLGroup.objects.prefetch_related("tags")
+    serializer_class = ACLGroupSerializer
+    filterset_class = filtersets.ACLGroupFilterSet
+
+
+class ACLGroupInterfaceAssignmentViewSet(NetBoxModelViewSet):
+    """
+    Defines the view set for the django ACLGroupInterfaceAssignment model & associates it to a view.
+    """
+
+    queryset = models.ACLGroupInterfaceAssignment.objects.prefetch_related(
+        "acl_group",
+        "interface",
+        "tags",
+    )
+    serializer_class = ACLGroupInterfaceAssignmentSerializer
+    filterset_class = filtersets.ACLGroupInterfaceAssignmentFilterSet

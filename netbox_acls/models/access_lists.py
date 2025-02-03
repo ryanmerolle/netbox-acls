@@ -17,6 +17,8 @@ from ..constants import ACL_HOST_ASSIGNMENT_MODELS, ACL_INTERFACE_ASSIGNMENT_MOD
 __all__ = (
     "AccessList",
     "ACLInterfaceAssignment",
+    "ACLGroup",
+    "ACLGroupInterfaceAssignment",
 )
 
 
@@ -24,6 +26,31 @@ alphanumeric_plus = RegexValidator(
     r"^[a-zA-Z0-9-_]+$",
     "Only alphanumeric, hyphens, and underscores characters are allowed.",
 )
+
+
+class ACLGroup(NetBoxModel):
+    """
+    Model definition for ACL Groups.
+    """
+
+    name = models.CharField(
+        max_length=500,
+        validators=[alphanumeric_plus],
+    )
+    description = models.TextField(
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "ACL Group"
+        verbose_name_plural = "ACL Groups"
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("plugins:netbox_acls:aclgroup", args=[self.pk])
 
 
 class AccessList(NetBoxModel):
@@ -57,6 +84,13 @@ class AccessList(NetBoxModel):
     )
     comments = models.TextField(
         blank=True,
+    )
+    group = models.ForeignKey(
+        to=ACLGroup,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="access_lists",
     )
 
     clone_fields = (
@@ -149,6 +183,55 @@ class ACLInterfaceAssignment(NetBoxModel):
     @classmethod
     def get_prerequisite_models(cls):
         return [AccessList]
+
+    def get_direction_color(self):
+        return ACLAssignmentDirectionChoices.colors.get(self.direction)
+
+
+class ACLGroupInterfaceAssignment(NetBoxModel):
+    """
+    Model definition for ACL Group Interface Assignments.
+    """
+
+    acl_group = models.ForeignKey(
+        on_delete=models.CASCADE,
+        to=ACLGroup,
+        verbose_name="ACL Group",
+    )
+    interface = models.ForeignKey(
+        on_delete=models.CASCADE,
+        to=Interface,
+        verbose_name="Interface",
+    )
+    direction = models.CharField(
+        max_length=30,
+        choices=ACLAssignmentDirectionChoices,
+    )
+    comments = models.TextField(
+        blank=True,
+    )
+
+    clone_fields = ("acl_group", "interface", "direction")
+
+    class Meta:
+        unique_together = [
+            "acl_group",
+            "interface",
+            "direction",
+        ]
+        ordering = [
+            "acl_group",
+            "interface",
+            "direction",
+        ]
+        verbose_name = "ACL Group Interface Assignment"
+        verbose_name_plural = "ACL Group Interface Assignments"
+
+    def get_absolute_url(self):
+        return reverse(
+            "plugins:netbox_acls:aclgroupinterfaceassignment",
+            args=[self.pk],
+        )
 
     def get_direction_color(self):
         return ACLAssignmentDirectionChoices.colors.get(self.direction)

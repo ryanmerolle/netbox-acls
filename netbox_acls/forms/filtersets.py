@@ -29,6 +29,8 @@ from ..models import (
     ACLExtendedRule,
     ACLInterfaceAssignment,
     ACLStandardRule,
+    ACLGroup,
+    ACLGroupInterfaceAssignment,
 )
 
 __all__ = (
@@ -36,6 +38,8 @@ __all__ = (
     "ACLInterfaceAssignmentFilterForm",
     "ACLStandardRuleFilterForm",
     "ACLExtendedRuleFilterForm",
+    "ACLGroupFilterForm",
+    "ACLGroupInterfaceAssignmentFilterForm",
 )
 
 
@@ -88,11 +92,16 @@ class AccessListFilterForm(NetBoxModelFilterSetForm):
         required=False,
         label="Default Action",
     )
+    group = DynamicModelChoiceField(
+        queryset=ACLGroup.objects.all(),
+        required=False,
+        label="ACL Group",
+    )
     tag = TagFilterField(model)
 
     fieldsets = (
         FieldSet("region", "site_group", "site", "device_id", "virtual_chassis_id", "virtual_machine_id", name=_("Host Details")),
-        FieldSet("type", "default_action", name=_('ACL Details')),
+        FieldSet("type", "default_action", "group", name=_('ACL Details')),
         FieldSet("q", "tag",name=None)
     )
 
@@ -226,4 +235,50 @@ class ACLExtendedRuleFilterForm(NetBoxModelFilterSetForm):
     fieldsets = (
         FieldSet("access_list", "action", "source_prefix", "desintation_prefix", "protocol", name=_('Rule Details')),
         FieldSet("q", "tag",name=None)
+    )
+
+
+class ACLGroupFilterForm(NetBoxModelFilterSetForm):
+    """
+    GUI filter form to search the django ACLGroup model.
+    """
+
+    model = ACLGroup
+    tag = TagFilterField(model)
+    name = forms.CharField(
+        required=False,
+        label="Name",
+    )
+
+    fieldsets = (
+        FieldSet("name", name=_('ACL Group Details')),
+        FieldSet("q", "tag", name=None)
+    )
+
+
+class ACLGroupInterfaceAssignmentFilterForm(NetBoxModelFilterSetForm):
+    """
+    GUI filter form to search the django ACLGroupInterfaceAssignment model.
+    """
+
+    model = ACLGroupInterfaceAssignment
+    tag = TagFilterField(model)
+    acl_group = DynamicModelChoiceField(
+        queryset=ACLGroup.objects.all(),
+        required=False,
+        label="ACL Group",
+    )
+    interface = DynamicModelChoiceField(
+        queryset=Interface.objects.all(),
+        required=False,
+        label="Interface",
+    )
+    direction = forms.ChoiceField(
+        choices=add_blank_choice(ACLAssignmentDirectionChoices),
+        required=False,
+    )
+
+    fieldsets = (
+        FieldSet("acl_group", "interface", "direction", name=_('ACL Group Interface Assignment Details')),
+        FieldSet("q", "tag", name=None)
     )

@@ -17,6 +17,8 @@ from ..models import (
     ACLExtendedRule,
     ACLInterfaceAssignment,
     ACLStandardRule,
+    ACLGroup,
+    ACLGroupInterfaceAssignment,
 )
 from .nested_serializers import NestedAccessListSerializer
 
@@ -25,6 +27,8 @@ __all__ = [
     "ACLInterfaceAssignmentSerializer",
     "ACLStandardRuleSerializer",
     "ACLExtendedRuleSerializer",
+    "ACLGroupSerializer",
+    "ACLGroupInterfaceAssignmentSerializer",
 ]
 
 # Sets a standard error message for ACL rules with an action of remark, but no remark set.
@@ -50,6 +54,11 @@ class AccessListSerializer(NetBoxModelSerializer):
         queryset=ContentType.objects.filter(ACL_HOST_ASSIGNMENT_MODELS),
     )
     assigned_object = serializers.SerializerMethodField(read_only=True)
+    group = serializers.PrimaryKeyRelatedField(
+        queryset=ACLGroup.objects.all(),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         """
@@ -73,6 +82,7 @@ class AccessListSerializer(NetBoxModelSerializer):
             "created",
             "last_updated",
             "rule_count",
+            "group",
         )
         brief_fields = ("id", "url", "name", "display")
 
@@ -337,3 +347,63 @@ class ACLExtendedRuleSerializer(NetBoxModelSerializer):
             raise serializers.ValidationError(error_message)
 
         return super().validate(data)
+
+
+class ACLGroupSerializer(NetBoxModelSerializer):
+    """
+    Defines the serializer for the django ACLGroup model & associates it to a view.
+    """
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:netbox_acls-api:aclgroup-detail",
+    )
+
+    class Meta:
+        """
+        Associates the django model ACLGroup & fields to the serializer.
+        """
+
+        model = ACLGroup
+        fields = (
+            "id",
+            "url",
+            "name",
+            "description",
+            "created",
+            "last_updated",
+        )
+        brief_fields = ("id", "url", "name")
+
+
+class ACLGroupInterfaceAssignmentSerializer(NetBoxModelSerializer):
+    """
+    Defines the serializer for the django ACLGroupInterfaceAssignment model & associates it to a view.
+    """
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="plugins-api:netbox_acls-api:aclgroupinterfaceassignment-detail",
+    )
+    acl_group = serializers.PrimaryKeyRelatedField(
+        queryset=ACLGroup.objects.all(),
+    )
+    interface = serializers.PrimaryKeyRelatedField(
+        queryset=Interface.objects.all(),
+    )
+
+    class Meta:
+        """
+        Associates the django model ACLGroupInterfaceAssignment & fields to the serializer.
+        """
+
+        model = ACLGroupInterfaceAssignment
+        fields = (
+            "id",
+            "url",
+            "acl_group",
+            "interface",
+            "direction",
+            "comments",
+            "created",
+            "last_updated",
+        )
+        brief_fields = ("id", "url", "acl_group", "interface")

@@ -24,6 +24,8 @@ from ..models import (
     ACLExtendedRule,
     ACLInterfaceAssignment,
     ACLStandardRule,
+    ACLGroup,
+    ACLGroupInterfaceAssignment,
 )
 
 __all__ = (
@@ -31,6 +33,8 @@ __all__ = (
     "ACLInterfaceAssignmentForm",
     "ACLStandardRuleForm",
     "ACLExtendedRuleForm",
+    "ACLGroupForm",
+    "ACLGroupInterfaceAssignmentForm",
 )
 
 # Sets a standard mark_safe help_text value to be used by the various classes
@@ -121,7 +125,7 @@ class AccessListForm(NetBoxModelForm):
     comments = CommentField()
     fieldsets = (
         FieldSet('region', 'site_group', 'site', 'virtual_machine', 'virtual_chassis', 'device', name=_('Assignment')),
-        FieldSet('name', 'type', 'default_action', name=_('Access List')),
+        FieldSet('name', 'type', 'default_action', 'group', name=_('Access List')),
         FieldSet('comments', 'tags', name=_('')),
     )
     
@@ -137,6 +141,7 @@ class AccessListForm(NetBoxModelForm):
             "name",
             "type",
             "default_action",
+            "group",
             "comments",
             "tags",
         )
@@ -608,6 +613,88 @@ class ACLExtendedRuleForm(NetBoxModelForm):
                 error_message["protocol"] = ["Action is set to remark, Protocol CANNOT be set."]
         elif remark:
             error_message["remark"] = [error_message_remark_without_action_remark]
+
+        if error_message:
+            raise ValidationError(error_message)
+
+
+class ACLGroupForm(NetBoxModelForm):
+    """
+    GUI form to add or edit an ACLGroup.
+    Requires a name.
+    """
+
+    class Meta:
+        model = ACLGroup
+        fields = (
+            "name",
+            "description",
+            "tags",
+        )
+
+
+class ACLGroupInterfaceAssignmentForm(NetBoxModelForm):
+    """
+    GUI form to add or edit ACL Group Interface Assignments.
+    Requires an acl_group, an interface, and a direction.
+    """
+
+    acl_group = DynamicModelChoiceField(
+        queryset=ACLGroup.objects.all(),
+        label="ACL Group",
+    )
+    interface = DynamicModelChoiceField(
+        queryset=Interface.objects.all(),
+        label="Interface",
+    )
+
+    class Meta:
+        model = ACLGroupInterfaceAssignment
+        fields = (
+            "acl_group",
+            "interface",
+            "direction",
+            "comments",
+            "tags",
+        )
+
+    def clean(self):
+        """
+        Validates form inputs before submitting:
+          - Check if duplicate entry.
+          - Check that the interface does not have an existing ACL Group applied in the direction already.
+        """
+        super().clean()
+
+        error_message = {}
+        acl_group = self.cleaned_data.get("acl_group")
+        interface = self.cleaned_data.get("interface")
+        direction = self.cleaned_data.get("direction")
+
+        # Check for duplicate entry.
+        existing_assignment = ACLGroupInterfaceAssignment.objects.filter(
+            acl_group=acl_group,
+            interface=interface,
+            direction=direction,
+        )
+        if existing_assignment.exists():
+            error_duplicate_entry = "An ACL Group with this name is already associated to this interface & direction."
+            error_message |= {
+                "acl_group": [error_duplicate_entry],
+                "interface": [error_duplicate_entry],
+                "direction": [error_duplicate_entry],
+            }
+
+        # Check that the interface does not have an existing ACL Group applied in the direction already.
+        if ACLGroupInterfaceAssignment.objects.filter(
+            interface=interface,
+            direction=direction,
+        ).exists():
+            error_interface_already_assigned = "Interfaces can only have 1 ACL Group assigned in each direction."
+            error_message |= {
+                "direction": [error_interface_already_assigned],
+                "interface": [error_interface_already_assigned],
+            }
 
         if error_message:
             raise ValidationError(error_message)
