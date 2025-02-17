@@ -18,35 +18,33 @@
     <div class="col col-md-6">
       <div class="card">
         <h2 class="card-header">Access List</h2>
-        <div class="card-body">
-          <table class="table table-hover attr-table">
-            <caption>Access List</caption>
-            <tr>
-              <th scope="row">Type</th>
-              <td>{% badge object.get_type_display bg_color=object.get_type_color %}</td>
-            </tr>
-            <tr>
-              <th scope="row">Default Action</th>
-              <td>{% badge object.get_default_action_display bg_color=object.get_default_action_color %}</td>
-            </tr>
-            <tr>
-              <th scope="row">Rules</th>
-              {% if object.type == 'standard' %}
-                <td>
-                  <a href="{% url 'plugins:netbox_acls:aclstandardrule_list' %}?access_list={{ object.pk }}">{{ object.aclstandardrules.count|placeholder }}</a>
-                </td>
-              {% elif object.type == 'extended' %}
-                <td>
-                  <a href="{% url 'plugins:netbox_acls:aclextendedrule_list' %}?access_list={{ object.pk }}">{{ object.aclextendedrules.count|placeholder }}</a>
-                </td>
-              {% endif %}
-            </tr>
-            <tr>
-              <th scope="row">Assigned Host</th>
-              <td>{{ object.assigned_object|linkify }}</td>
-            </tr>
-          </table>
-        </div>
+        <table class="table table-hover attr-table">
+          <caption>Access List</caption>
+          <tr>
+            <th scope="row">Type</th>
+            <td>{% badge object.get_type_display bg_color=object.get_type_color %}</td>
+          </tr>
+          <tr>
+            <th scope="row">Default Action</th>
+            <td>{% badge object.get_default_action_display bg_color=object.get_default_action_color %}</td>
+          </tr>
+          <tr>
+            <th scope="row">Rules</th>
+            {% if object.type == 'standard' %}
+              <td>
+                <a href="{% url 'plugins:netbox_acls:aclstandardrule_list' %}?access_list={{ object.pk }}">{{ object.aclstandardrules.count|placeholder }}</a>
+              </td>
+            {% elif object.type == 'extended' %}
+              <td>
+                <a href="{% url 'plugins:netbox_acls:aclextendedrule_list' %}?access_list={{ object.pk }}">{{ object.aclextendedrules.count|placeholder }}</a>
+              </td>
+            {% endif %}
+          </tr>
+          <tr>
+            <th scope="row">Assigned Host</th>
+            <td>{{ object.assigned_object|linkify }}</td>
+          </tr>
+        </table>
       </div>
       {% include 'inc/panels/custom_fields.html' %}
     </div>
@@ -59,7 +57,7 @@
     <div class="col col-md-12">
       <div class="card">
         <h2 class="card-header">{{ object.get_type_display }} Rules</h2>
-        <div class="card-body table-responsive">
+        <div class="table-responsive">
           {% render_table rules_table %}
         </div>
       </div>

@@ -18,7 +18,7 @@
   <form method="post">
     {% csrf_token %}
     <div class="card">
-      <div class="card-body" id="object_list">
+      <div id="object_list">
         {% include 'htmx/table.html' %}
       </div>
     </div>
