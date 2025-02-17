@@ -25,10 +25,7 @@ This project just looks to build on top of this framework and model presented.
 
 ## Contributing
 
-This project is currently maintained jointly by:
-
-- [Abhimanyu Saharan](https://github.com/abhi1693)
-- [Ryan Merolle](https://github.com/ryanmerolle)
+This project is currently maintained by the [netbox-community](https://github.com/netbox-community).
 
 See the [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
