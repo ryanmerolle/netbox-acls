@@ -35,7 +35,7 @@ __all__ = (
 
 # Sets a standard mark_safe help_text value to be used by the various classes
 help_text_acl_rule_logic = mark_safe(
-    "<b>*Note:</b> CANNOT be set if action is set to remark.",
+    "<b>*Note:</b> CANNOT be set if action is set to remark OR protocol is set to IP",
 )
 # Sets a standard help_text value to be used by the various classes for acl action
 help_text_acl_action = "Action the rule will take (remark, deny, or allow)."
@@ -608,6 +608,11 @@ class ACLExtendedRuleForm(NetBoxModelForm):
                 error_message["protocol"] = ["Action is set to remark, Protocol CANNOT be set."]
         elif remark:
             error_message["remark"] = [error_message_remark_without_action_remark]
+        if protocol == "ip" and action != "remark":
+            if source_ports:
+                error_message["source_ports"] = ["Protoclol set to IP, source ports CANNOT be set"]
+            if destination_ports:
+                error_message["destination_ports"] = ["Protoclol set to IP, destination ports CANNOT be set"]
 
         if error_message:
             raise ValidationError(error_message)
