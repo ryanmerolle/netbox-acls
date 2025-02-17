@@ -25,10 +25,7 @@ This project just looks to build on top of this framework and model presented.
 
 ## Contributing
 
-This project is currently maintained jointly by:
-
-- [Abhimanyu Saharan](https://github.com/abhi1693)
-- [Ryan Merolle](https://github.com/ryanmerolle)
+This project is currently maintained by the [netbox-community](https://github.com/netbox-community).
 
 See the [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
@@ -38,6 +35,7 @@ Each Plugin Version listed below has been tested with its corresponding NetBox V
 
 | NetBox Version      | Plugin Version |
 |:-------------------:|:--------------:|
+|      4.2.x          |     1.8.0      |
 |      4.1.x          |     1.7.0      |
 |   >= 4.0.2 < 4.1.0  |     1.6.1      |
 |      3.7.x          |     1.5.0      |
