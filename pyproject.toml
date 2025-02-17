@@ -55,6 +55,7 @@ classifiers=[
     'Topic :: System :: Networking',
     'Topic :: Internet',
 ]
+keywords = ["netbox", "netbox-plugin"]
 
 
 
