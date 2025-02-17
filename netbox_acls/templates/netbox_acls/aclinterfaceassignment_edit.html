@@ -7,13 +7,13 @@
 {% block form %}
   {% render_errors form %}
   <div class="field-group">
-    <h4>Access List Details</h4>
+    <h2>Access List Details</h2>
     {% render_field form.access_list %}
     {% render_field form.direction %}
     {% render_field form.tags %}
   </div>
   <div class="field-group">
-    <h4>Interface Assignment</h4>
+    <h2>Interface Assignment</h2>
     <ul class="nav nav-pills" role="tablist">
       <li class="nav-item" role="presentation">
         <button
@@ -54,7 +54,7 @@
     </div>
   </div>
   <div class="field-group">
-    <h4>Comments</h4>
+    <h2>Comments</h2>
     {% render_field form.comments %}
   </div>
   {% if form.custom_fields %}
