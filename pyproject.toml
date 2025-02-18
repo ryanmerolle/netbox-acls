@@ -55,7 +55,7 @@ classifiers=[
     'Topic :: Internet',
 ]
 keywords = ["netbox", "netbox-plugin"]
-licenses-files = ["LICENSE.txt"]
+license-files = ["LICENSE.txt"]
 
 
 [project.urls]
