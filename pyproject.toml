@@ -55,6 +55,7 @@ classifiers=[
     'Topic :: Internet',
 ]
 keywords = ["netbox", "netbox-plugin"]
+license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
 license-files = ["LICENSE.txt"]
 
 
