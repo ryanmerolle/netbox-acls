@@ -2,14 +2,9 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.package-data]
-netbox_acls = ["templates/**"]
-
 [tool.setuptools]
 packages = ["netbox_acls"]
-
-[tool.setuptools.package-dir]
-netbox_acls = "netbox_acls"
+package-data = {"netbox_acls" = ["**/*", "templates/**"]}
 
 
 [tool.black]
@@ -37,7 +32,7 @@ line-length = 140
 
 [project]
 name = "netbox-acls"
-version = "1.8.0"
+version = "1.8.1"
 readme = "README.md"
 requires-python = ">=3.10.0"
 classifiers=[
