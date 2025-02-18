@@ -7,9 +7,7 @@ netbox_acls = ["templates/**"]
 
 [tool.setuptools]
 packages = ["netbox_acls"]
-
-[tool.setuptools.package-dir]
-netbox_acls = "netbox_acls"
+package-data = {"netbox_acls" = ["**/*", "templates/**"]}
 
 
 [tool.black]
